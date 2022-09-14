@@ -1,4 +1,14 @@
-import {Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel} from "@mui/material";
+import {
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TablePagination,
+  TableRow,
+  TableSortLabel
+} from "@mui/material";
 import {useState} from "react";
 import {getMinutes, setTimeFormat} from "../utils";
 import {get} from "lodash";
@@ -23,6 +33,8 @@ const UserTable = ({data}) => {
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState([]);
   const [tableData, setTableData] = useState([]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
   // console.log(order)
   // console.log(orderBy)
 
@@ -50,31 +62,52 @@ const UserTable = ({data}) => {
     setOrderBy(property);
   };
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
+
   return (
-    <TableContainer component={Paper}>
-      <Table size="small">
-        <CustomTableHead onRequestSort={handleRequestSort} order={order} orderBy={orderBy}  daysNum={maxNumOfDays}/>
-        <TableBody>
-          {modifiedArr.sort(getComparator(order, orderBy))
-            .map(user => {
-            return (
-              <TableRow key={user.id}>
-                <TableCell>
-                  {user.Fullname}
-                </TableCell>
-                {user.Days.map((day, index) => {
-                  return (
-                    <TableCell key={index}>
-                      {day ? setTimeFormat(day.socialTime) : 0}
+    <>
+      <TableContainer component={Paper}>
+        <Table size="small">
+          <CustomTableHead onRequestSort={handleRequestSort} order={order} orderBy={orderBy}  daysNum={maxNumOfDays}/>
+          <TableBody>
+            {modifiedArr.sort(getComparator(order, orderBy))
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map(user => {
+                return (
+                  <TableRow key={user.id}>
+                    <TableCell>
+                      {user.Fullname}
                     </TableCell>
-                  )
-                })}
-              </TableRow>
-            )
-          })}
-        </TableBody>
-      </Table>
-    </TableContainer>
+                    {user.Days.map((day, index) => {
+                      return (
+                        <TableCell key={index}>
+                          {day ? setTimeFormat(day.socialTime) : 0}
+                        </TableCell>
+                      )
+                    })}
+                  </TableRow>
+                )
+              })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <TablePagination
+        rowsPerPageOptions={[5, 10, 25]}
+        component="div"
+        count={data.length}
+        rowsPerPage={rowsPerPage}
+        page={page}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
+    </>
   )
 }
 
