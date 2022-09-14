@@ -7,7 +7,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  TableSortLabel
+  TableSortLabel, TextField
 } from "@mui/material";
 import {useState} from "react";
 import {getMinutes, setTimeFormat} from "../utils";
@@ -52,8 +52,7 @@ const UserTable = ({data}) => {
       const index = Number(today);
       arr[index - 1] = {Date: day.Date, socialTime: getMinutes(day.End) - getMinutes(day.Start)};
     })
-
-    return {...user, Days: arr};
+    return {...user, Days: arr, montlySocialTime: arr.reduce((acc, cur) => acc += cur.socialTime, 0)};
   })
 
   const handleRequestSort = (event, property) => {
@@ -73,6 +72,7 @@ const UserTable = ({data}) => {
 
   return (
     <Paper>
+      <TextField label="Search" variant="standard"/>
       <TableContainer >
         <Table size="small">
           <CustomTableHead onRequestSort={handleRequestSort} order={order} orderBy={orderBy}  daysNum={maxNumOfDays}/>
@@ -93,6 +93,9 @@ const UserTable = ({data}) => {
                         </TableCell>
                       )
                     })}
+                    <TableCell>
+                      {setTimeFormat(user.montlySocialTime)}
+                    </TableCell>
                   </TableRow>
                 )
               })}
@@ -153,7 +156,16 @@ const CustomTableHead = ({daysNum, order, orderBy, onRequestSort}) => {
             </TableCell>
           )
         })}
-
+        <TableCell>
+          <TableSortLabel
+            active={orderBy === 'montlySocialTime'}
+            key={'montlySocialTime'}
+            direction={orderBy === 'montlySocialTime' ? order : 'asc'}
+            onClick={createSortHandler('montlySocialTime')}
+          >
+            Monthly total
+          </TableSortLabel>
+        </TableCell>
       </TableRow>
     </TableHead>
   )
