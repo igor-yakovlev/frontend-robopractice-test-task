@@ -1,12 +1,13 @@
 import {Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableSortLabel} from "@mui/material";
 import {useState} from "react";
-import {getMinutes} from "../utils";
+import {getMinutes, setTimeFormat} from "../utils";
+import {get} from "lodash";
 
 function descendingComparator(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
+  if (get(b, orderBy) < get(a, orderBy)) {
     return -1;
   }
-  if (b[orderBy] > a[orderBy]) {
+  if (get(b, orderBy) > get(a, orderBy)) {
     return 1;
   }
   return 0;
@@ -18,13 +19,12 @@ function getComparator(order, orderBy) {
     : (a, b) => -descendingComparator(a, b, orderBy);
 }
 
-
 const UserTable = ({data}) => {
   const [order, setOrder] = useState('asc');
-  const [orderBy, setOrderBy] = useState('calories');
+  const [orderBy, setOrderBy] = useState([]);
   const [tableData, setTableData] = useState([]);
-  console.log(order)
-  console.log(orderBy)
+  // console.log(order)
+  // console.log(orderBy)
 
 
   const sortedDataByDaysCount = data.sort((a, b) => a.Days.length - b.Days.length);
@@ -32,16 +32,16 @@ const UserTable = ({data}) => {
 
   const modifiedArr = data.map(user => {
     const arr = [];
-    if (user.Days.length < maxNumOfDays) {
-      const pushCount = maxNumOfDays - user.Days.length;
-      for (let i = pushCount; i > 0; i--) {
-        arr.push(null)
-      }
+    for (let i = 0; i < maxNumOfDays; i++) {
+      arr.push({socialTime: 0})
     }
-    const modifiedDaysArr = user.Days.map(day => {
-      return {Date: day.Date , socTime: `${Math.floor((getMinutes(day.End) - getMinutes(day.Start)) / 60)}:${(getMinutes(day.End) - getMinutes(day.Start)) % 60}`}
+    user.Days.forEach((day) => {
+      const [, , today] = day.Date.split('-');
+      const index = Number(today);
+      arr[index - 1] = {Date: day.Date, socialTime: getMinutes(day.End) - getMinutes(day.Start)};
     })
-    return {...user, Days: [...modifiedDaysArr, ...arr]};
+
+    return {...user, Days: arr};
   })
 
   const handleRequestSort = (event, property) => {
@@ -65,7 +65,7 @@ const UserTable = ({data}) => {
                 {user.Days.map((day, index) => {
                   return (
                     <TableCell key={index}>
-                      {day ? day.socTime : 0}
+                      {day ? setTimeFormat(day.socialTime) : 0}
                     </TableCell>
                   )
                 })}
@@ -110,9 +110,9 @@ const CustomTableHead = ({daysNum, order, orderBy, onRequestSort}) => {
               sortDirection={orderBy === num ? order : false}
             >
               <TableSortLabel
-                active={orderBy === num}
-                direction={orderBy === num ? order : 'asc'}
-                onClick={createSortHandler(num)}
+                active={orderBy === `Days[${[num - 1]}].socialTime`}
+                direction={orderBy === `Days[${[num - 1]}].socialTime` ? order : 'asc'}
+                onClick={createSortHandler(`Days[${[num - 1]}].socialTime`)}
               >
                 {num}
               </TableSortLabel>
@@ -124,3 +124,9 @@ const CustomTableHead = ({daysNum, order, orderBy, onRequestSort}) => {
     </TableHead>
   )
 }
+
+
+// temp1[0].Days.reduce((acc, cur) => {
+//   acc[cur.Date] = cur;
+//   return acc
+// }, {})
