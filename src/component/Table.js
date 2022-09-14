@@ -30,9 +30,9 @@ function getComparator(order, orderBy) {
 }
 
 const UserTable = ({data}) => {
+  const [tableData, setTableData] = useState([]);
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState([]);
-  const [tableData, setTableData] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   // console.log(order)
@@ -72,13 +72,14 @@ const UserTable = ({data}) => {
   };
 
   return (
-    <>
-      <TableContainer component={Paper}>
+    <Paper>
+      <TableContainer >
         <Table size="small">
           <CustomTableHead onRequestSort={handleRequestSort} order={order} orderBy={orderBy}  daysNum={maxNumOfDays}/>
           <TableBody>
-            {modifiedArr.sort(getComparator(order, orderBy))
+            {modifiedArr
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .sort(getComparator(order, orderBy))
               .map(user => {
                 return (
                   <TableRow key={user.id}>
@@ -107,7 +108,7 @@ const UserTable = ({data}) => {
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
-    </>
+    </Paper>
   )
 }
 
