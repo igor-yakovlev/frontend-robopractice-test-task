@@ -1,4 +1,5 @@
 import {
+  Autocomplete,
   Paper,
   Table,
   TableBody,
@@ -7,7 +8,8 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  TableSortLabel, TextField
+  TableSortLabel,
+  TextField,
 } from "@mui/material";
 import {useState} from "react";
 import {getMinutes, setTimeFormat} from "../utils";
@@ -35,6 +37,7 @@ const UserTable = ({data}) => {
   const [orderBy, setOrderBy] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [search, setSearch] = useState('');
   // console.log(order)
   // console.log(orderBy)
 
@@ -70,20 +73,37 @@ const UserTable = ({data}) => {
     setPage(0);
   };
 
+
+  const handleSearchUser = ({target}) => {
+    const {value} = target;
+    setSearch(value);
+  }
+
+  const defaultProps = {
+    options: modifiedArr,
+    getOptionLabel: (option) => option.Fullname,
+  };
+
   return (
     <Paper>
-      <TextField label="Search" variant="standard"/>
-      <TableContainer >
-        <Table size="small">
-          <CustomTableHead onRequestSort={handleRequestSort} order={order} orderBy={orderBy}  daysNum={maxNumOfDays}/>
+      <TextField label="Search" name={'name'} value={search} onChange={handleSearchUser} variant="standard"/>
+      <TableContainer sx={{ maxHeight: 'max-content', maxWidth: 'max-content' }}>
+        <Table stickyHeader>
+          <CustomTableHead onRequestSort={handleRequestSort} order={order} orderBy={orderBy} daysNum={maxNumOfDays}/>
           <TableBody>
             {modifiedArr
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .sort(getComparator(order, orderBy))
+              .filter(user => user.Fullname.includes(search))
               .map(user => {
                 return (
-                  <TableRow key={user.id}>
-                    <TableCell>
+                  <TableRow key={user.id} hover>
+                    <TableCell style={{
+                      position: 'sticky',
+                      left: 0,
+                      background: 'white',
+                      zIndex: 800,
+                    }}>
                       {user.Fullname}
                     </TableCell>
                     {user.Days.map((day, index) => {
@@ -93,7 +113,12 @@ const UserTable = ({data}) => {
                         </TableCell>
                       )
                     })}
-                    <TableCell>
+                    <TableCell style={{
+                      position: 'sticky',
+                      right: 0,
+                      background: 'white',
+                      zIndex: 800,
+                    }}>
                       {setTimeFormat(user.montlySocialTime)}
                     </TableCell>
                   </TableRow>
@@ -126,11 +151,15 @@ const CustomTableHead = ({daysNum, order, orderBy, onRequestSort}) => {
   const createSortHandler = (property) => (event) => {
     onRequestSort(event, property);
   }
-
   return (
     <TableHead>
       <TableRow>
-        <TableCell>
+        <TableCell  style={{
+          position: 'sticky',
+          left: 0,
+          background: 'white',
+          zIndex: 900,
+        }}>
           <TableSortLabel
             active={orderBy === 'Fullname'}
             key={'Fullname'}
@@ -156,7 +185,12 @@ const CustomTableHead = ({daysNum, order, orderBy, onRequestSort}) => {
             </TableCell>
           )
         })}
-        <TableCell>
+        <TableCell style={{
+          position: 'sticky',
+          right: 0,
+          background: 'white',
+          zIndex: 800,
+        }}>
           <TableSortLabel
             active={orderBy === 'montlySocialTime'}
             key={'montlySocialTime'}
