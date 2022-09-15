@@ -73,17 +73,10 @@ const UserTable = ({data}) => {
     setPage(0);
   };
 
-
   const handleSearchUser = ({target}) => {
     const {value} = target;
     setSearch(value);
   }
-
-  const defaultProps = {
-    options: modifiedArr,
-    getOptionLabel: (option) => option.Fullname,
-  };
-
   return (
     <Paper>
       <TextField label="Search" name={'name'} value={search} onChange={handleSearchUser} variant="standard"/>
