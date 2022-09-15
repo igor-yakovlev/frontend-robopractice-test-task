@@ -11,7 +11,7 @@ import {
   TableSortLabel,
   TextField,
 } from "@mui/material";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {getMinutes, setTimeFormat} from "../utils";
 import {get} from "lodash";
 
@@ -32,15 +32,12 @@ function getComparator(order, orderBy) {
 }
 
 const UserTable = ({data}) => {
-  const [tableData, setTableData] = useState([]);
   const [order, setOrder] = useState('asc');
   const [orderBy, setOrderBy] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [search, setSearch] = useState('');
-  // console.log(order)
-  // console.log(orderBy)
-
+  const [filteredArray, setFilteredArray] = useState([]);
 
   const sortedDataByDaysCount = data.sort((a, b) => a.Days.length - b.Days.length);
   const maxNumOfDays = sortedDataByDaysCount[sortedDataByDaysCount.length - 1].Days.length;
@@ -77,6 +74,13 @@ const UserTable = ({data}) => {
     const {value} = target;
     setSearch(value);
   }
+  useEffect(() => {
+    const filteredArray = modifiedArr.filter(user => user.Fullname.includes(search))
+    setFilteredArray(filteredArray)
+    setPage(0)
+  }, [search]);
+
+
   return (
     <Paper>
       <TextField label="Search" name={'name'} value={search} onChange={handleSearchUser} variant="standard"/>
@@ -84,10 +88,9 @@ const UserTable = ({data}) => {
         <Table stickyHeader>
           <CustomTableHead onRequestSort={handleRequestSort} order={order} orderBy={orderBy} daysNum={maxNumOfDays}/>
           <TableBody>
-            {modifiedArr
+            {filteredArray
               .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
               .sort(getComparator(order, orderBy))
-              .filter(user => user.Fullname.includes(search))
               .map(user => {
                 return (
                   <TableRow key={user.id} hover>
@@ -120,15 +123,15 @@ const UserTable = ({data}) => {
           </TableBody>
         </Table>
       </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25]}
-        component="div"
-        count={data.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
+        <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={filteredArray.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onPageChange={handleChangePage}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
     </Paper>
   )
 }
@@ -197,9 +200,3 @@ const CustomTableHead = ({daysNum, order, orderBy, onRequestSort}) => {
     </TableHead>
   )
 }
-
-
-// temp1[0].Days.reduce((acc, cur) => {
-//   acc[cur.Date] = cur;
-//   return acc
-// }, {})
