@@ -1,5 +1,5 @@
 export const fetchData = async () => {
-  const response = await fetch('/api/users', {method: 'GET' })
+  const response = await fetch(`${window.location.origin}/api/users`, {method: 'GET' })
     .then(res => res.json());
   return response
 }

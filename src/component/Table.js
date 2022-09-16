@@ -1,5 +1,4 @@
 import {
-  Autocomplete,
   Paper,
   Table,
   TableBody,
@@ -52,8 +51,8 @@ const UserTable = ({data}) => {
       const index = Number(today);
       arr[index - 1] = {Date: day.Date, socialTime: getMinutes(day.End) - getMinutes(day.Start)};
     })
-    return {...user, Days: arr, montlySocialTime: arr.reduce((acc, cur) => acc += cur.socialTime, 0)};
-  })
+    return {...user, Days: arr, monthlySocialTime: arr.reduce((acc, cur) => acc += cur.socialTime, 0)};
+  });
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -73,7 +72,8 @@ const UserTable = ({data}) => {
   const handleSearchUser = ({target}) => {
     const {value} = target;
     setSearch(value);
-  }
+  };
+
   useEffect(() => {
     const filteredArray = modifiedArr.filter(user => user.Fullname.includes(search))
     setFilteredArray(filteredArray)
@@ -115,7 +115,7 @@ const UserTable = ({data}) => {
                       background: 'white',
                       zIndex: 800,
                     }}>
-                      {setTimeFormat(user.montlySocialTime)}
+                      {setTimeFormat(user.monthlySocialTime)}
                     </TableCell>
                   </TableRow>
                 )
